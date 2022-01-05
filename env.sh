@@ -5,7 +5,7 @@
 function buildone {
     filename=$1
     target="${filename%.*}"
-    env LIBRARY_PATH=$HOME/apueExercise/apue.3e/lib/libapue.a \
-        C_INCLUDE_PATH=$HOME/apueExercise/apue.3e/include/apue.h \
+    env LIBRARY_PATH=$HOME/apueExercise/apue.3e/lib/ \
+        C_INCLUDE_PATH=$HOME/apueExercise/apue.3e/include/ \
         gcc $filename -o $target -lapue
 }
