@@ -2,7 +2,7 @@
 #include <fcntl.h>
 char buf1[] = "abcdefghij";
 char buf2[] = "ABCDEFGHIJ";
-char buf3[] = "1234";
+char buf3[] = "1234567890";
 
 int main(void)
 {
@@ -12,12 +12,18 @@ int main(void)
     if (write(fd, buf1, 10) != 10)
         err_sys("buf1 write error");
         /* offset now = 10 */
-    if (lseek(fd, 16384, SEEK_SET) == -1)
+    if (lseek(fd, 1000, SEEK_SET) == -1)
         err_sys("lseek error");
-        /* offset now = 16384 */
+        /* offset now = 1000 */
     if (write(fd, buf2, 10) != 10)
         err_sys("buf2 write error");
-        /* offset now = 16394 */
+        /* offset now = 1010 */
+    if (lseek(fd, 8000, SEEK_SET) == -1)
+        err_sys("lseek error");
+        /* offset now = 8000 */
+    if (write(fd, buf3, 10) != 10)
+        err_sys("buf3 write error");
+        /* offset now = 8010 */
 
 
     if ((fd = creat("file.nohole", FILE_MODE)) < 0)
