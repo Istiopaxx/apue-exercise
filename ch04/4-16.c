@@ -36,6 +36,9 @@ int recursive_path(void)
 
     if (mkdir("newverylongdirectorynameihopethismakepositiveresult", RWXRXRX) < 0)
     {
+        if (getcwd(ptr, size) == NULL)
+            err_sys("getcwd failed");
+        printf("end dir = %s\n", ptr);
         err_sys("mkdir failed");
         return -1;
     }

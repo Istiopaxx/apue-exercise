@@ -319,38 +319,43 @@ Can you archive the directory using either `tar` or `cpio`?
 
 ### A
 
+In wsl 1.
 
-
-
-
-
-
----
-
-## 4-
-
-### Q
-
-
-
-
-
-### A
-
-
+![4-16.result](./images/4-16.result.gif)
 
 
 
 ---
 
-## 4-
+## 4-17
 
 ### Q
 
+In Section 3.16, we described the /dev/fd feature.
+For any user to be able to access these files, their permissions must be `rw-rw-rw-`.
+Some programs that create an output file delete the file first, in case it already exists, ignoring the return code:
 
-
+```C
+unlink(path);
+if ((fd = creat(path, FILE_MODE)) < 0)
+    err_sys(...);
+```
+What happens if path is /dev/fd/1?
 
 
 ### A
+
+```C
+keisluv:~$ ls -ld /dev/fd
+lrwxrwxrwx 1 root root 13 Jan 27 00:35 /dev/fd -> /proc/self/fd
+keisluv:~$ ls -ld /proc/self/fd/
+dr-x------ 2 keisluv keisluv 0 Jan 27 01:42 /proc/self/fd/
+```
+
+It looks `/def/fd` is symlink to `/proc/self/fd`.
+And `/proc/self/fd` has no write and execute permission to 'other' users.
+So `unlink` would fail for other users.
+
+
 
 
