@@ -8,17 +8,19 @@ Advanced Programming in UNIX Envrionment Exercises
 
 `gcc` 컴파일러가 설치되어있고 `$PATH`에 등록되어 있어야 합니다.
 
-루트에서 
-```bash
-source env.sh
-```
-실행 후
+1. 먼저 /apue.3e/lib 에서 `make all` 실행
 
-원하는 소스 파일을
-```bash
-buildone <filename>
-```
-명령어를 실행하여 컴파일합니다.
+2. 루트에서 
+    ```bash
+    source env.sh
+    ```
+    실행 후
+
+3. 원하는 소스 파일을
+    ```bash
+    buildone <filename>
+    ```
+    명령어를 실행하여 컴파일합니다.
 
 ## 교재
 
