@@ -1,6 +1,8 @@
 #include "apue.h"
 #include <dirent.h>
 #include <limits.h>
+#include <time.h>
+#include <sys/time.h>
 
 /* function type that is called for each filename */
 typedef int Myfunc(const char *, const struct stat *, int);
@@ -12,6 +14,14 @@ static long nreg, ndir, nblk, nchr, nfifo, nslink, nsock, ntot;
 int main(int argc, char *argv[])
 {
     int ret;
+    time_t t1, t2;
+    struct timeval start, end, take;
+
+    if ((t1 = gettimeofday(&start, NULL)) == -1)
+    {
+        err_sys("gettimeofday() error");
+    }
+
 
     if (argc != 2)
         err_quit("usage: ftw <starting-pathname>");
@@ -42,6 +52,19 @@ int main(int argc, char *argv[])
 
     printf("sockets = %7ld, %5.2f %%\n", nsock,
            nsock * 100.0 / ntot);
+
+    if ((t2 = gettimeofday(&end, NULL)) == -1)
+    {
+        err_sys("gettimeofday() error");
+    }
+    take.tv_sec = end.tv_sec - start.tv_sec;
+    take.tv_usec = end.tv_usec - start.tv_usec;
+    if (take.tv_usec < 0)
+    {
+        take.tv_sec = take.tv_sec - 1;
+        take.tv_usec = take.tv_usec + 1000000;
+    }
+    printf("%02ld.%02ld second takes.\n", take.tv_sec, take.tv_usec);
 
     exit(ret);
 }

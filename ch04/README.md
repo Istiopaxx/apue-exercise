@@ -223,36 +223,122 @@ Compare the time used by this version and the version in the text.
 
 ### A
 
+See `4.11.c` program.
+
+![4-11](./images/4-11.PNG)
+
+The result is that it seems using `chdir` is slightly more expensive.
 
 
 ---
 
-## 4-
+## 4-12
 
 ### Q
+
+Each process also has a root directory that is used for resolution of absolute pathnames.
+This root directory can be changed with the `chroot` function.
+Look up the description for this function in your manuals.
+When might this function be useful?
+
+
+### A
+
+I don't have any idea about this.
+
+
+---
+
+## 4-13
+
+### Q
+
+How can you set only one of the two time values with the `utimes` function?
+
+### A
+
+Before calling `utimes` function, save non-change time value(`atime` or `mtime`) and give it to parmeter.
+
+Below is example result.
+This program recieve two arguments.
+First is the file name, second is which kind of time would change to now time.
+
+![4-13](./images/4-13.PNG)
+
+
+
+---
+
+## 4-14
+
+### Q
+
+Some versions of the `finger(1)` command output "New mail received ..." and "unread since ..." where ... are the corresponding times and dates. 
+How can the program determine these two times and dates?
+
+
+### A
+
+Maybe `finger(1)` get file's info by `stat` function, and it looks the `mtime` and `atime` to get the time information.
+
+
+---
+
+## 4-15
+
+### Q
+
+Examine the archive formats used by the cpio(1) and tar(1) commands. 
+(These descriptions are usually found in Section 5 of the UNIX Programmer ’s Manual.)
+How many of the three possible time values are saved for each file?
+When a file is restored, what value do you think the access time is set to, and why?
+
+### A
+
+Most of the implementation save the time value of `mtime`.
+`atime` or `ctime` is usually not included.
+
+I think when file is restored, access time(`atime`) would be set to now: the restore time.
+That's because access time means when the file is opened, and when restoring, the file must be accessed.
+So it looks clear to set `atime` to restoring time.
+
+
+---
+
+## 4-16
+
+### Q
+
+Does the UNIX System have a fundamental limitation on the depth of a directory tree?
+To find out, write a program that creates a directory and then changes to that directory, in a loop. 
+Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s `PATH_MAX` limit.
+Can you call `getcwd` to fetch the directory’s pathname?
+How do the standard UNIX System tools deal with this long pathname?
+Can you archive the directory using either `tar` or `cpio`?
+
 
 ### A
 
 
 
+
+
+
+
 ---
 
 ## 4-
 
 ### Q
+
+
+
+
 
 ### A
 
 
 
----
-
-## 4-
-
-### Q
-
-### A
-
 
 
 ---
@@ -261,15 +347,9 @@ Compare the time used by this version and the version in the text.
 
 ### Q
 
-### A
 
 
 
----
-
-## 4-
-
-### Q
 
 ### A
 

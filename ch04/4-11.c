@@ -1,6 +1,8 @@
 #include "apue.h"
 #include <dirent.h>
 #include <limits.h>
+#include <time.h>
+#include <sys/time.h>
 
 /* function type that is called for each filename */
 typedef int Myfunc(const char *, const struct stat *, int);
@@ -12,6 +14,13 @@ static long nreg, ndir, nblk, nchr, nfifo, nslink, nsock, ntot;
 int main(int argc, char *argv[])
 {
     int ret;
+    time_t t1, t2;
+    struct timeval start, end, take;
+
+    if ((t1 = gettimeofday(&start, NULL)) == -1)
+    {
+        err_sys("gettimeofday() error");
+    }
 
     if (argc != 2)
         err_quit("usage: ftw <starting-pathname>");
@@ -43,6 +52,20 @@ int main(int argc, char *argv[])
     printf("sockets = %7ld, %5.2f %%\n", nsock,
            nsock * 100.0 / ntot);
 
+
+    if ((t2 = gettimeofday(&end, NULL)) == -1)
+    {
+        err_sys("gettimeofday() error");
+    }
+    take.tv_sec = end.tv_sec - start.tv_sec;
+    take.tv_usec = end.tv_usec - start.tv_usec;
+    if (take.tv_usec < 0)
+    {
+        take.tv_sec = take.tv_sec - 1;
+        take.tv_usec = take.tv_usec + 1000000;
+    }
+    printf("%02ld.%02ld second takes.\n", take.tv_sec, take.tv_usec);
+
     exit(ret);
 }
 
@@ -55,7 +78,7 @@ int main(int argc, char *argv[])
 #define FTW_DNR 3 /* directory that can’t be read */
 #define FTW_NS 4  /* file that we can’t stat */
 
-static char *filepath; 
+static char *filepath;
 static size_t pathlen;
 
 static int /* we return whatever func() returns */
@@ -73,13 +96,6 @@ myftw(char *pathname, Myfunc *func)
 
     strcpy(filepath, pathname);
     chdir(filepath);
-
-
-    char *ptr;
-    size_t size;
-    if (getcwd(ptr, size) == NULL)
-        err_sys("getcwd failed");
-    printf("cwd = %s\n", ptr);
 
     return (dopath(func));
 }
@@ -99,7 +115,8 @@ dopath(Myfunc *func)
     DIR *dp;
     int ret, n;
 
-    if (lstat(filepath, &statbuf) < 0) { /* stat error */
+    if (lstat(filepath, &statbuf) < 0)
+    { /* stat error */
         return (func(filepath, &statbuf, FTW_NS));
     }
     if (S_ISDIR(statbuf.st_mode) == 0) /* not a directory */
@@ -115,7 +132,7 @@ dopath(Myfunc *func)
     if ((dp = opendir(filepath)) == NULL) /* can’t read directory */
         return (func(filepath, &statbuf, FTW_DNR));
 
-    chdir(filepath);    /* chdir to current path */
+    chdir(filepath); /* chdir to current path */
     while ((dirp = readdir(dp)) != NULL)
     {
         if (strcmp(dirp->d_name, ".") == 0 ||
@@ -124,21 +141,21 @@ dopath(Myfunc *func)
         strcpy(filepath, "./");             /* change path to current directory */
         strcpy(&filepath[2], dirp->d_name); /* append name after "/" */
 
-        if ((ret = dopath(func)) != 0)      /* recursive */
-            break;                          /* time to leave */
+        if ((ret = dopath(func)) != 0) /* recursive */
+            break;                     /* time to leave */
     }
-    
-    chdir("../");   /* chdir to parent directory */
+
+    chdir("../"); /* chdir to parent directory */
     if (closedir(dp) < 0)
         err_ret("can’t close directory %s", filepath);
-    
+
     return (ret);
 }
 
 static int
 myfunc(const char *pathname, const struct stat *statptr, int type)
 {
-    
+
     switch (type)
     {
     case FTW_F:
