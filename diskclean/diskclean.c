@@ -141,7 +141,7 @@ myfunc(const char *pathname, const struct stat *statptr, int type)
             if (response[0] == 'y')
             {
                 if (unlink(pathname) < 0)
-                    err_sys("unlink error");
+                    err_ret("can't unlink file %s", pathname);
                 printf("file deleted.\n");
             }
             else if (response[0] == 'n')
@@ -177,7 +177,7 @@ myfunc(const char *pathname, const struct stat *statptr, int type)
                 if (response[0] == 'y')
                 {
                     if (rmdir(pathname) < 0)
-                        err_sys("rmdir error");
+                        err_ret("can't remove directory %s", pathname);
                     printf("directory deleted.\n");
                 }
                 else if (response[0] == 'n')

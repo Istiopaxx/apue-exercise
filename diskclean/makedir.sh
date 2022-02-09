@@ -10,6 +10,7 @@ function makedir {
     cd "dir${fakename}"
 }
 
+mkdir $startdir
 cd $startdir
 makedir
 makedir
