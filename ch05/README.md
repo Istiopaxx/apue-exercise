@@ -122,12 +122,18 @@ int main(void)
 {
     int fd1 = fileno(stdout), fd2 = fileno(stdin);
 
+    fflush(stdout);
+    fflush(stdin);
+
     fsync(fd1);
     fsync(fd2);
 
     exit(0);
 }
 ```
+
+Before `fsync`, program must fflush the stream so buffer must be sent to kernel.
+
 
 ---
 
@@ -228,7 +234,17 @@ void sig_int(int signo)
 
 ### A. 
 
-`printf()` function just flush the buffer and write buf to stdout.
+When `fgets` called, it first flush all stdout buffer.
+
+> Line buffering comes with two caveats. First, the size of the buffer that the
+> standard I/O library uses to collect each line is fixed, so I/O might take place if
+> we fill this buffer before writing a newline. Second, whenever input is
+> requested through the standard I/O library from either (a) an unbuffered stream
+> or (b) a line-buffered stream (that requires data to be requested from the kernel),
+> all line-buffered output streams are flushed. The reason for the qualifier on (b)
+> is that the requested data may already be in the buffer, which doesn’t require
+> data to be read from the kernel. Obviously, any input from an unbuffered
+> stream, item (a), requires data to be obtained from the kernel.        - book 145P~146P.
 
 ---
 
@@ -245,152 +261,6 @@ Use this function to implement `fmemopen` for FreeBSD and Mac OS X.
 
 ### A. 
 
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
+I don't have FreeBSD or Mac OS X... 
 
 ---
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
-
-
-
-## 5-
-
-### Q. 
-
-
-
-### A. 
-
-
-
----
-
-
