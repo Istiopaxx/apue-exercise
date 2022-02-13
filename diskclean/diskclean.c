@@ -3,24 +3,77 @@
 #include <limits.h>
 #include <time.h>
 #include <sys/time.h>
+#include <ctype.h>
+#include <fcntl.h>
 
 /* function type that is called for each filename */
 typedef int Myfunc(const char *, const struct stat *, int);
 static Myfunc myfunc;
 static int myftw(char *, Myfunc *);
 static int dopath(Myfunc *);
-static long nreg, ndir, nblk, nchr, nfifo, nslink, nsock, ntot;
 
 static time_t predicate_time;
+static int yflag, pflag, dflag, tflag, qflag, hflag;
 
 int main(int argc, char *argv[])
 {
-    time_t predicate_sec = 1;
+    int c, ret, fd;
+    char *tvalue = NULL;
+    time_t predicate_sec = 7 * 24 * 60 * 60;
+    struct tm tm;
+    FILE *fp;
+
+    opterr = 0;
+    while ((c = getopt(argc, argv, "ypdt:qh")) != -1)
+        switch (c)
+        {
+        case 'y':
+            yflag = 1;
+            break;
+        case 'p':
+            pflag = 1;
+            break;
+        case 'd':
+            dflag = 1;
+            break;
+        case 't':
+            tflag = 1;
+            tvalue = optarg;
+            break;
+        case 'q':
+            qflag = 1;
+            break;
+        case 'h':
+            pflag = 1;
+            break;
+        case '?':
+            if (optopt == 'c')
+                fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+            else if (isprint(optopt))
+                fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+            else
+                fprintf(stderr,
+                        "Unknown option character `\\x%x'.\n",
+                        optopt);
+            return 1;
+        default:
+            abort();
+        }
+
+    if (yflag && qflag)
+        if ((fp = freopen("/dev/null", "r+", stdout)) == NULL)
+            err_sys("freopen error");
+
+    if (tflag)
+    {
+        strptime(tvalue, "%j:%H:%M:%S", &tm);
+        predicate_sec = mktime(&tm);
+    }
     predicate_time = time(NULL) - predicate_sec;
 
-    int ret = myftw(argv[1], myfunc);
+    ret = myftw(argv[optind], myfunc);
 
-    exit(0);
+    exit(ret);
 }
 
 /*
@@ -136,18 +189,32 @@ myfunc(const char *pathname, const struct stat *statptr, int type)
             lasttime = atime;
         if (lasttime <= predicate_time)
         {
-            printf("%s\t\tfile - (y/n) : ", pathname);
-            fgets(response, 10, stdin);
-            if (response[0] == 'y')
+            printf("%s\t\t - file - ", pathname);
+            if (!pflag)
             {
-                if (unlink(pathname) < 0)
-                    err_ret("can't unlink file %s", pathname);
-                printf("file deleted.\n");
+                if (yflag)
+                {
+                    if (unlink(pathname) < 0)
+                        err_ret("can't unlink file %s", pathname);
+                    printf("file deleted.");
+                }
+                else
+                {
+                    printf("(y/n) : ");
+                    fgets(response, 10, stdin);
+                    if (response[0] == 'y')
+                    {
+                        if (unlink(pathname) < 0)
+                            err_ret("can't unlink file %s", pathname);
+                        printf("file deleted.");
+                    }
+                    else if (response[0] == 'n')
+                        printf("file not deleted.");
+                    else
+                        printf("Not valid response.");
+                }
             }
-            else if (response[0] == 'n')
-                printf("file not deleted.\n");
-            else
-                printf("Not valid response.\n");
+            printf("\n");
         }
         break;
     case FTW_D:
@@ -168,22 +235,36 @@ myfunc(const char *pathname, const struct stat *statptr, int type)
             dirdelflag = 0;
             break;
         }
-        if (dirdelflag)
+        if (dirdelflag && !dflag)
         {
             if (lasttime <= predicate_time)
             {
-                printf("%s\t\tdirectory - (y/n) : ", pathname);
-                fgets(response, 10, stdin);
-                if (response[0] == 'y')
+                printf("%s\t\t - directory - ", pathname);
+                if (!pflag)
                 {
-                    if (rmdir(pathname) < 0)
-                        err_ret("can't remove directory %s", pathname);
-                    printf("directory deleted.\n");
+                    if (yflag)
+                    {
+                        if (rmdir(pathname) < 0)
+                            err_ret("can't remove directory %s", pathname);
+                        printf("directory deleted.");
+                    }
+                    else
+                    {
+                        printf("(y/n) : ");
+                        fgets(response, 10, stdin);
+                        if (response[0] == 'y')
+                        {
+                            if (rmdir(pathname) < 0)
+                                err_ret("can't remove directory %s", pathname);
+                            printf("directory deleted.");
+                        }
+                        else if (response[0] == 'n')
+                            printf("directory not deleted.");
+                        else
+                            printf("Not valid response.");
+                    }
                 }
-                else if (response[0] == 'n')
-                    printf("directory not deleted.\n");
-                else
-                    printf("Not valid response.\n");
+                printf("\n");
             }
         }
         break;
