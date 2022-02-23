@@ -15,19 +15,22 @@ If it does not, how can you simulate this behavior?
 
 ### A. 
 
-
-
+My system(WSL 1, gcc) doesn't behaves like above, so i implemented.
+<img src="./images/8-1.PNG">
 
 ---
 
-## 8-
+## 8-2
 
 ### Q. 
 
-
-
+Recall the typical arrangement of memory in Figure 7.6.
+Because the stack frames corresponding to each function call are usually stored in the stack, and because after a `vfork` the child runs in the address space of the parent, what happens if the call to `vfork` is from a function other than `main` and the child does a return from this function after the `vfork`?
+Write a test program to verify this, and draw a picture of what’s happening.
 
 ### A. 
+
+
 
 
 
