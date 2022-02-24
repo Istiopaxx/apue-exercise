@@ -11,7 +11,6 @@ int myfunc(void) {
     else if (pid == 0)
     {   /* child */
         int_var = 55;
-        return 1;
     }
     else
     {   /* parent */
