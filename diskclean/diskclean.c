@@ -135,7 +135,6 @@ dopath(Myfunc *func)
     struct dirent *dirp;
     DIR *dp;
     int ret, n;
-    char *temppath;
 
     if (lstat(fullpath, &statbuf) < 0) /* stat error */
         return (func(fullpath, &statbuf, FTW_NS));
@@ -147,8 +146,8 @@ dopath(Myfunc *func)
      * It’s a directory. First call func() for the directory,
      * then process each filename in the directory.
      */
-    temppath = malloc(strlen(fullpath));
-    strcpy(temppath, fullpath);
+
+    /* save current stat for later use */
     tempstatbuf = statbuf;
 
     n = strlen(fullpath);
@@ -175,10 +174,12 @@ dopath(Myfunc *func)
             break;                          /* time to leave */
     }
 
-    if ((ret = func(temppath, &tempstatbuf, FTW_D)) != 0)
+    fullpath[n - 1] = 0; /* erase everything from slash onward */
+
+    /* do func for this directory itself */
+    if ((ret = func(fullpath, &tempstatbuf, FTW_D)) != 0)
         return (ret);
 
-    fullpath[n - 1] = 0; /* erase everything from slash onward */
     if (closedir(dp) < 0)
         err_ret("can’t close directory %s", fullpath);
 
