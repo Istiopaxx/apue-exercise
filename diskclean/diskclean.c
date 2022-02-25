@@ -18,10 +18,12 @@ static int yflag, pflag, dflag, tflag, qflag, hflag;
 int main(int argc, char *argv[])
 {
     int c, ret, fd;
-    char *tvalue = NULL;
+    char *tvalue = NULL, *path_ptr;
+    size_t size;
     time_t predicate_sec = 7 * 24 * 60 * 60;
     struct tm tm;
     FILE *fp;
+    char *help_str = "DISKCLEAN\n\nNAME\n\tdiskclean - find old files and clean\n\nSYNOPSIS\n\tdiskclean [OPTION] ... [PATHNAME]\n\nDESCRIPTION\n\tStart from given pathname, visit subdirectories and its files recursively(if pathname not given, default current working directory). If visiting file\'s access/modify time is older than given time period(default is 7 days), delete the file interactively. If directory\'s all entries are deleted, check the directory itself\'s access/modify time and delete interactively.\n\n\t-t \n\t\tSet the time period of criteria to given argument string. String format is DDD:hh:mm:ss. Default time is 7 days.\n\t\n\t-d\n\t\tDo not delete the directory in the case of all directory entries are cleaned.\n\n\t-p\n\t\tDo not delete the file, just print the file\'s pathname to stdout.\n\t\n\t-y\n\t\tDo not ask you to confirm deleting files. \n\t\n\t-q\n\t\tWith -y, the program do not print to stdout at all.\n\n\t-h\n\t\tPrint the help message.\n\nUSAGE\n\tdiskclean -y -t 07:00:00:00 ./some/path\n\n\tdiskclean -d -y -q ./some/path\n\n\tdiskclean -p ./some/path";
 
     opterr = 0;
     while ((c = getopt(argc, argv, "ypdt:qh")) != -1)
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
             qflag = 1;
             break;
         case 'h':
-            pflag = 1;
+            hflag = 1;
             break;
         case '?':
             if (optopt == 'c')
@@ -60,6 +62,12 @@ int main(int argc, char *argv[])
             abort();
         }
 
+    if (hflag)
+    {
+        printf("%s\n", help_str);
+        exit(0);
+    }
+
     if (yflag && qflag)
         if ((fp = freopen("/dev/null", "r+", stdout)) == NULL)
             err_sys("freopen error");
@@ -71,7 +79,16 @@ int main(int argc, char *argv[])
     }
     predicate_time = time(NULL) - predicate_sec;
 
-    ret = myftw(argv[optind], myfunc);
+
+    if (argv[optind] == NULL)
+    {
+        path_ptr = path_alloc(&size);
+        if (getcwd(path_ptr, size) == NULL)
+            err_sys("getcwd error");
+        ret = myftw(path_ptr, myfunc);
+    }
+    else
+        ret = myftw(argv[optind], myfunc);
 
     exit(ret);
 }
