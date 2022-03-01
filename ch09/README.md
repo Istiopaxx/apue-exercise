@@ -39,6 +39,6 @@ Verify that the child becomes a process group leader and that the child no longe
 
 ### A. 
 
-
+<img src="./images/9-2.PNG">
 
 ---
