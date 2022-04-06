@@ -9,6 +9,6 @@ export C_INCLUDE_PATH=$HOME/apue-exercise/apue.3e/include/
 function buildone {
     filename=$1
     target="${filename%.*}"
-    gcc $filename -o $target -lapue
+    gcc $filename -o $target -lapue -pthread
 }
 
