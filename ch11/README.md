@@ -111,6 +111,6 @@ Provide an implementation of the `pthread_barrier_wait` function.
 
 ### A. 
 
-
+See `11-05.c`.
 
 ---
